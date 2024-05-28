@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <locale.h>
 
 
 typedef struct agente {
