@@ -29,7 +29,7 @@ typedef struct cliente {
 
 typedef struct propriedade {
     int idPropriedade;          // Identificador único da propriedade
-    char tipo[30];              // Tipo de propriedade (casa, apartamento, escritório, etc.)
+    char tipo[30];              // Tipo de propriedade (casa, apartamento, escritório e terreno.)
     char morada[100];           // Morada da propriedade
     float area;                 // Área da propriedade em metros quadrados
     float preco;                // Preço da propriedade
@@ -38,6 +38,9 @@ typedef struct propriedade {
     int idvendedor;
     int idcomprador;            // por defeito = 0
     int aposcompra;             // 0 = nada, 1 = comprada, 2 = alugada
+    float precoalugada;
+    char datacompra[20];        // por defeito 00/00/0000 
+    int anosaluga;              // por defeito = 0
 } PROPRIEDADE;
 
 typedef struct visita {
@@ -112,6 +115,7 @@ void listarPropriedadesjaVendaCliente(PROPRIEDADE_NODE *lista, int idVendedor);
 void removerPropriedade(PROPRIEDADE_NODE **lista, int idPropriedade);
 void editarPropriedade(PROPRIEDADE_NODE *lista, int idPropriedade, PROPRIEDADE propriedadeAtualizada);
 void propriedadeArrenda(PROPRIEDADE_NODE *lista, int idPropriedade, int tipo, int idComprador);
+void propriedadeFatura(PROPRIEDADE_NODE *lista, const char *data, int n, int m);
 
 // Funções para manipulação da lista de clientes
 CLIENTE_NODE* adicionarCliente(CLIENTE_NODE *lista, CLIENTE novoCliente);

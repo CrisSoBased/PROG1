@@ -322,6 +322,14 @@ void fazerLoginAgente() {
     }
 }
 
+
+void obterDataAtual(char *dataAtual) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(dataAtual, "%02d/%02d/%04d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+}
+
+
 void menuAgenteAutenticado() {
     int opcao;
     char dataEscolhida[11];
@@ -339,13 +347,17 @@ void menuAgenteAutenticado() {
         printf("4. Listar todas as visitas de hoje e de um determinado dia por tipo de propriedade\n");
         printf("5. Saber o histórico de visitas a uma determinada propriedade\n");
         printf("6. Listar as visitas em que o cliente não compareceu para um determinado dia\n");
-        printf("7. Saber, por cada tipo de propriedade, quanto foi faturado hoje e este mês\n");
-        printf("8. Gerar um relatório por dia e por mês de contas\n");
-        printf("9. Adicionar cliente a fila de espera\n");
-        printf("10. Listar todos os clientes na fila de espera e a respetiva duração estimada da visita\n");
-        printf("11. Apresentar o próximo cliente a ser atendido\n");
-        printf("12. Calcular o tempo de espera estimado para todos os elementos da fila\n");
-        printf("13. Voltar para trás\n");
+        printf("7. Saber, por cada tipo de propriedade, quanto foi faturado hoje\n");
+        printf("8. Saber, por cada tipo de propriedade, quanto foi faturado num certo dia exato\n");
+        printf("9. Saber, por cada tipo de propriedade, quanto foi faturado num certo mes de um ano\n");
+        printf("10. Gerar um relatório de um certo dia de contas\n");
+        printf("11. Gerar um relatório de um certo mês de contas\n");
+        printf("12. Gerar um relatório por dia e por mês de contas\n");
+        printf("13. Adicionar cliente a fila de espera\n");
+        printf("14. Listar todos os clientes na fila de espera e a respetiva duração estimada da visita\n");
+        printf("15. Apresentar o próximo cliente a ser atendido\n");
+        printf("16. Calcular o tempo de espera estimado para todos os elementos da fila\n");
+        printf("17. Voltar para trás\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
         getchar();  // Limpar o buffer do teclado
@@ -395,40 +407,75 @@ void menuAgenteAutenticado() {
                 listarVisitasNaoCompareceu(listaVisitas, dataEscolhida, idCliente);
                 break;
             case 7:
-                printf("Ainda não implementado\n");
+                char dataAtual[11];
+                obterDataAtual(dataAtual);
+                propriedadeFatura(listaVisitas,dataAtual,0,0);
                 break;
             case 8:
-                printf("Ainda não implementado\n");
+                printf("Insira a data desejada (dd/mm/yyyy): ");
+                fgets(dataEscolhida, sizeof(dataEscolhida), stdin);
+                dataEscolhida[strcspn(dataEscolhida, "\n")] = '\0'; // Remover a quebra de linha
+                propriedadeFatura(listaVisitas,dataEscolhida,0,0);
                 break;
             case 9:
+                int mes, ano;
+                char data[20];
+                printf("Digite o mês (mm): ");
+                scanf("%d", &mes);
+                printf("Digite o ano (aaaa): ");
+                scanf("%d", &ano);
+                // Formatar a data no formato 01/mm/aaaa
+                snprintf(data, sizeof(data), "01/%02d/%04d", mes, ano);
+                propriedadeFatura(listaVisitas,data,0,1);
+                break;
+            case 10:
+                printf("Insira a data desejada (dd/mm/yyyy): ");
+                fgets(dataEscolhida, sizeof(dataEscolhida), stdin);
+                dataEscolhida[strcspn(dataEscolhida, "\n")] = '\0'; // Remover a quebra de linha
+                propriedadeFatura(listaVisitas,dataEscolhida,1,0);
+                break;
+            case 11:
+                int mes, ano;
+                char data[20];
+                printf("Digite o mês (mm): ");
+                scanf("%d", &mes);
+                printf("Digite o ano (aaaa): ");
+                scanf("%d", &ano);
+                snprintf(data, sizeof(data), "01/%02d/%04d", mes, ano);
+                propriedadeFatura(listaVisitas,data,1,1);
+                break;
+            case 12:
+                printf("Ainda não implementado\n");
+                break;
+            case 13:
                 printf("Insira o ID do cliente: ");
                 scanf("%d", &idCliente);
-                getchar();  // Limpar o buffer do teclado
+                getchar(); 
                 printf("Insira o nome do cliente: ");
                 fgets(nomeCliente, sizeof(nomeCliente), stdin);
-                nomeCliente[strcspn(nomeCliente, "\n")] = '\0'; // Remover a quebra de linha
+                nomeCliente[strcspn(nomeCliente, "\n")] = '\0'; 
                 printf("Insira a duração estimada da visita (em horas): ");
                 scanf("%f", &duracaoEstimada);
                 fila = adicionarClienteFilaEspera(fila, idCliente, nomeCliente, duracaoEstimada);
                 printf("Cliente adicionado à fila de espera.\n");
                 break;
-            case 10:
+            case 14:
                 listarClientesFilaEspera(fila);
                 break;
-            case 11:
+            case 15:
                 apresentarProximoClienteFilaEspera(fila);
                 break;
-            case 12:
+            case 16:
                 printf("Tempo de espera estimado para todos os clientes: %.2f horas\n", calcularTempoEsperaEstimado(fila));
                 break;
-            case 13:
+            case 17:
                 printf("Voltando para o menu anterior...\n");
                 menuAgente();
                 return;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (opcao != 13);
+    } while (opcao != 17);
 }
 
 
@@ -483,25 +530,29 @@ void menuClienteAutenticado() {
                 break;
             case 4:
                 printf("Adicionar nova propriedade para venda...\n");
-                // Capturar os detalhes da nova propriedade
                 printf("ID da Propriedade: ");
                 scanf("%d", &novaPropriedade.idPropriedade);
                 printf("Tipo: ");
                 getchar(); // Limpar o buffer do teclado
                 fgets(novaPropriedade.tipo, sizeof(novaPropriedade.tipo), stdin);
-                novaPropriedade.tipo[strcspn(novaPropriedade.tipo, "\n")] = '\0'; // Remover a quebra de linha
+                novaPropriedade.tipo[strcspn(novaPropriedade.tipo, "\n")] = '\0'; 
                 printf("Morada: ");
                 fgets(novaPropriedade.morada, sizeof(novaPropriedade.morada), stdin);
-                novaPropriedade.morada[strcspn(novaPropriedade.morada, "\n")] = '\0'; // Remover a quebra de linha
+                novaPropriedade.morada[strcspn(novaPropriedade.morada, "\n")] = '\0'; 
                 printf("Área: ");
                 scanf("%f", &novaPropriedade.area);
                 printf("Preço: ");
                 scanf("%f", &novaPropriedade.preco);
+                printf("Preço por aluguer: ");
+                scanf("%f", &novaPropriedade.precoalugada);
                 novaPropriedade.idAgente = 0;  // Defina o ID do agente apropriado
                 novaPropriedade.disponibilidade = 0;
                 novaPropriedade.idvendedor = clienteAutenticado.idCliente;
                 novaPropriedade.idcomprador = 0;
                 novaPropriedade.aposcompra = 0;
+                strcpy(novaPropriedade.datacompra, "00/00/0000"); 
+                novaPropriedade.anosaluga = 0;
+
                 listaPropriedades = adicionarPropriedade(listaPropriedades, novaPropriedade);
                 break;
             case 5:
@@ -889,21 +940,25 @@ void menuGerirPropriedades() {
                 PROPRIEDADE novaPropriedade;
                 printf("Digite o tipo da propriedade: ");
                 fgets(novaPropriedade.tipo, sizeof(novaPropriedade.tipo), stdin);
-                novaPropriedade.tipo[strcspn(novaPropriedade.tipo, "\n")] = '\0'; // Remover a quebra de linha
+                novaPropriedade.tipo[strcspn(novaPropriedade.tipo, "\n")] = '\0'; // Remover a quebra de linha ja se sabe
                 printf("Digite a morada da propriedade: ");
                 fgets(novaPropriedade.morada, sizeof(novaPropriedade.morada), stdin);
-                novaPropriedade.morada[strcspn(novaPropriedade.morada, "\n")] = '\0'; // Remover a quebra de linha
+                novaPropriedade.morada[strcspn(novaPropriedade.morada, "\n")] = '\0'; 
                 printf("Digite a área da propriedade (m²): ");
                 scanf("%f", &novaPropriedade.area);
                 printf("Digite o preço da propriedade: ");
                 scanf("%f", &novaPropriedade.preco);
+                printf("Digite o preço da propriedade por aluguer: ");
+                scanf("%f", &novaPropriedade.precoalugada);
                 printf("Digite o ID do agente responsável: ");
                 scanf("%d", &novaPropriedade.idAgente);
                 printf("Digite o ID do Vendedor: ");
                 scanf("%d", &novaPropriedade.idvendedor);
-                novaPropriedade.disponibilidade = 0; // Disponível por padrão
+                novaPropriedade.disponibilidade = 0; 
                 novaPropriedade.aposcompra = 0; 
-                // Adicionar a propriedade à lista
+                novaPropriedade.idcomprador = 0; 
+                strcpy(novaPropriedade.datacompra, "00/00/0000"); 
+                novaPropriedade.anosaluga = 0;
                 listaPropriedades = adicionarPropriedade(listaPropriedades, novaPropriedade);
                 break;
             }
