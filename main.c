@@ -1,4 +1,3 @@
-
 #include "listas.h"
 
 // Variáveis globais para armazenar as listas
@@ -279,7 +278,6 @@ void gravarTodasListas(AGENTE_NODE *listaAgentes, CLIENTE_NODE *listaClientes, P
 void fazerLogin() {
     char nome[50];
     char nif[10];
-    
     printf("Digite o nome: ");
     fgets(nome, sizeof(nome), stdin);
     nome[strcspn(nome, "\n")] = '\0'; // Remover a quebra de linha
@@ -292,7 +290,7 @@ void fazerLogin() {
     if (cliente.idCliente != -1) {
         printf("Login realizado com sucesso!\n");
         clienteAutenticado = cliente;  
-        menuClienteAutenticado(cliente.idCliente);
+        menuClienteAutenticado();
     } else {
         printf("Nome ou NIF incorretos. Tente novamente.\n");
     }
@@ -323,7 +321,7 @@ void fazerLoginAgente() {
 }
 
 
-void obterDataAtual(char *dataAtual) {
+void obterDataAtualtres(char *dataAtual) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     sprintf(dataAtual, "%02d/%02d/%04d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
@@ -357,10 +355,13 @@ void menuAgenteAutenticado() {
         printf("14. Listar todos os clientes na fila de espera e a respetiva duração estimada da visita\n");
         printf("15. Apresentar o próximo cliente a ser atendido\n");
         printf("16. Calcular o tempo de espera estimado para todos os elementos da fila\n");
-        printf("17. Voltar para trás\n");
+        printf("17. Aceitar vista\n");
+        printf("18. Mudar estado visita\n");
+        printf("19. Voltar para trás\n");
         printf("Escolha uma opção: ");
+        
         scanf("%d", &opcao);
-        getchar();  // Limpar o buffer do teclado
+        limparBuffer();  // Limpar o buffer do teclado
 
         switch (opcao) {
             case 1:
@@ -406,44 +407,53 @@ void menuAgenteAutenticado() {
                 scanf("%d", &idCliente);
                 listarVisitasNaoCompareceu(listaVisitas, dataEscolhida, idCliente);
                 break;
-            case 7:
+            case 7: {
                 char dataAtual[11];
-                obterDataAtual(dataAtual);
-                propriedadeFatura(listaVisitas,dataAtual,0,0);
+                obterDataAtualtres(dataAtual);
+                propriedadeFatura(listaPropriedades, dataAtual, 0, 0);
                 break;
+            }
             case 8:
                 printf("Insira a data desejada (dd/mm/yyyy): ");
                 fgets(dataEscolhida, sizeof(dataEscolhida), stdin);
                 dataEscolhida[strcspn(dataEscolhida, "\n")] = '\0'; // Remover a quebra de linha
-                propriedadeFatura(listaVisitas,dataEscolhida,0,0);
+                propriedadeFatura(listaPropriedades,dataEscolhida,0,0);
                 break;
-            case 9:
+            case 9: {
                 int mes, ano;
                 char data[20];
                 printf("Digite o mês (mm): ");
                 scanf("%d", &mes);
                 printf("Digite o ano (aaaa): ");
                 scanf("%d", &ano);
+                limparBuffer(); // Limpa o buffer após ler os valores
                 // Formatar a data no formato 01/mm/aaaa
                 snprintf(data, sizeof(data), "01/%02d/%04d", mes, ano);
-                propriedadeFatura(listaVisitas,data,0,1);
+                // Supondo que listaPropriedades é a lista correta a ser passada
+                propriedadeFatura(listaPropriedades, data, 0, 1);
                 break;
-            case 10:
+            }
+            case 10: 
                 printf("Insira a data desejada (dd/mm/yyyy): ");
                 fgets(dataEscolhida, sizeof(dataEscolhida), stdin);
                 dataEscolhida[strcspn(dataEscolhida, "\n")] = '\0'; // Remover a quebra de linha
-                propriedadeFatura(listaVisitas,dataEscolhida,1,0);
+                propriedadeFatura(listaPropriedades, dataEscolhida, 1, 0);
                 break;
-            case 11:
+            
+            case 11: {
                 int mes, ano;
                 char data[20];
                 printf("Digite o mês (mm): ");
                 scanf("%d", &mes);
                 printf("Digite o ano (aaaa): ");
                 scanf("%d", &ano);
+                limparBuffer(); // Limpa o buffer após ler os valores
                 snprintf(data, sizeof(data), "01/%02d/%04d", mes, ano);
-                propriedadeFatura(listaVisitas,data,1,1);
+                // Supondo que listaPropriedades é a lista correta a ser passada
+                propriedadeFatura(listaPropriedades, data, 1, 1);
                 break;
+            }
+            
             case 12:
                 printf("Ainda não implementado\n");
                 break;
@@ -469,13 +479,48 @@ void menuAgenteAutenticado() {
                 printf("Tempo de espera estimado para todos os clientes: %.2f horas\n", calcularTempoEsperaEstimado(fila));
                 break;
             case 17:
+                printf("Visitas por aceitar...\n");
+                listarVisitasPorAceitar(listaVisitas, agenteAutenticado->idAgente);
+                printf("Aceitar visita...\n");
+
+                int idVisitaParaAceitar;
+                printf("Digite o ID da visita que deseja aceitar: ");
+                scanf("%d", &idVisitaParaAceitar);
+                limparBuffer();  
+
+                aceitarVisita(listaVisitas, idVisitaParaAceitar);
+
+                break;
+            case 18:
+            {
+                printf("Visitas aceites...\n");
+                listarVisitasAceitarAgente(listaVisitas, agenteAutenticado->idAgente);
+                printf("Mudar estado visita...\n");
+
+                int idVisitaParaAceitar;
+                printf("Digite o ID da visita que deseja mudar o estado: ");
+                scanf("%d", &idVisitaParaAceitar);
+                
+                limparBuffer(); // Limpa o buffer após ler o ID
+
+                char novoEstado[20];
+                printf("Digite o novo estado da visita: ");
+                fgets(novoEstado, sizeof(novoEstado), stdin);
+                novoEstado[strcspn(novoEstado, "\n")] = '\0'; // Remover a quebra de linha
+
+                mudarEstadoVisita(listaVisitas, idVisitaParaAceitar, novoEstado);
+
+                break;
+            }
+            case 19:
                 printf("Voltando para o menu anterior...\n");
                 menuAgente();
                 return;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (opcao != 17);
+        gravarTodasListas(listaAgentes, listaClientes, listaPropriedades, listaVisitas, filaEspera);
+    } while (opcao != 19);
 }
 
 
@@ -494,9 +539,10 @@ void menuClienteAutenticado() {
         printf("7. Ver minhas propriedades a venda\n");
         printf("8. Ver minhas propriedades já vendidas\n");
         printf("9. Ver propriedades que aluguei ou comprei\n");
-        printf("10. Ver Visitas agendadas aceites\n");
-        printf("11. Ver Visitas agendadas por aceitar\n");
-        printf("12. Sair\n");
+        printf("10. Marcar visita\n");
+        printf("11. Ver Visitas agendadas aceites\n");
+        printf("12. Ver Visitas agendadas por aceitar\n");
+        printf("13. Sair\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
         getchar();
@@ -509,11 +555,9 @@ void menuClienteAutenticado() {
             case 2:
                 printf("Editar detalhes da conta...\n");
                 char nif[20];
-                CLIENTE clienteAtualizado;
-                printf("Digite o NIF do cliente a atualizar: ");
-                scanf("%s", nif);
+                CLIENTE clienteAtualizado;                
+                strcpy(clienteAtualizado.nif, clienteAutenticado.nif);
                 printf("Digite o novo nome do cliente: ");
-                getchar(); // Limpar o buffer do teclado
                 fgets(clienteAtualizado.nome, sizeof(clienteAtualizado.nome), stdin);
                 clienteAtualizado.nome[strcspn(clienteAtualizado.nome, "\n")] = '\0'; // Remover a quebra de linha
                 printf("Digite o novo telefone do cliente: ");
@@ -530,10 +574,8 @@ void menuClienteAutenticado() {
                 break;
             case 4:
                 printf("Adicionar nova propriedade para venda...\n");
-                printf("ID da Propriedade: ");
-                scanf("%d", &novaPropriedade.idPropriedade);
-                printf("Tipo: ");
-                getchar(); // Limpar o buffer do teclado
+                novaPropriedade.idPropriedade = encontrarMaiorIdPropriedade(listaPropriedades);
+                printf("Tipo (casa, apartamento, escritório e terreno.): ");
                 fgets(novaPropriedade.tipo, sizeof(novaPropriedade.tipo), stdin);
                 novaPropriedade.tipo[strcspn(novaPropriedade.tipo, "\n")] = '\0'; 
                 printf("Morada: ");
@@ -556,12 +598,14 @@ void menuClienteAutenticado() {
                 listaPropriedades = adicionarPropriedade(listaPropriedades, novaPropriedade);
                 break;
             case 5:
+                listarPropriedadesCompraCliente(listaPropriedades, clienteAutenticado.idCliente);
                 printf("Alugar propriedade...\n");
                 printf("ID da Propriedade: ");
                 scanf("%d", &idPropriedade);
                 propriedadeArrenda(listaPropriedades, idPropriedade, 2, clienteAutenticado.idCliente);
                 break;
             case 6:
+                listarPropriedadesCompraCliente(listaPropriedades, clienteAutenticado.idCliente);
                 printf("Comprar propriedade...\n");
                 printf("ID da Propriedade: ");
                 scanf("%d", &idPropriedade);
@@ -580,29 +624,64 @@ void menuClienteAutenticado() {
                 listarPropriedadesCompradasporCliente(listaPropriedades, clienteAutenticado.idCliente);
                 break;
             case 10:
-                printf("Ver Visitas aceites agendadas...\n");
-                listarVisitasPorClienteaceitadas(listaPropriedades, clienteAutenticado.idCliente);
+                printf("Propriedades para visita\n");
+                listarPropriedadesCompraCliente(listaPropriedades, clienteAutenticado.idCliente);
+                printf("Agentes disponíveis\n");
+                listarAgentesDisponiveis(listaAgentes);
+                printf("Marcar visita\n");
+
+                VISITA novaVisita;
+                novaVisita.idVisita = encontrarMaiorIdVisita(listaVisitas);
+                novaVisita.idCliente = clienteAutenticado.idCliente;
+
+                printf("Digite o ID da propriedade para visita: ");
+                scanf("%d", &novaVisita.idpropriedade);
+                limparBuffer();  // Limpa o buffer após ler o ID
+
+                printf("Digite o ID do agente: ");
+                scanf("%d", &novaVisita.idAgente);
+                limparBuffer();  // Limpa o buffer após ler o ID
+
+                printf("Digite a data e hora da visita (dd/mm/yyyy hh:mm): ");
+                fgets(novaVisita.dataHora, sizeof(novaVisita.dataHora), stdin);
+                novaVisita.dataHora[strcspn(novaVisita.dataHora, "\n")] = '\0';  // Remove a quebra de linha
+
+                strcpy(novaVisita.estado, "por aceitar");  // Estado padrão
+                novaVisita.relatorio[0] = '\0';  // Relatório vazio
+                novaVisita.preco = 10.0;  // Preço inicial
+                novaVisita.aceite = 0;  // Não aceite inicialmente
+
+                // Adicionar a nova visita à lista
+                listaVisitas = agendarVisita(listaVisitas, novaVisita);
+
+                printf("Visita marcada com sucesso!\n");
                 break;
             case 11:
-                printf("Ver Visitas por aceitar agendadas...\n");
-                listarVisitasPorClienteporaceitar(listaPropriedades, clienteAutenticado.idCliente);
+                printf("Ver Visitas aceites agendadas...\n");
+                listarVisitasPorClienteaceitadas(listaVisitas, clienteAutenticado.idCliente);
                 break;
             case 12:
+                printf("Ver Visitas por aceitar agendadas...\n");
+                listarVisitasPorClienteporaceitar(listaVisitas, clienteAutenticado.idCliente);
+                break;
+            case 13:
                 printf("Saindo...\n");
                 printMenuInicial();
                 break;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (opcao != 12);
+        gravarTodasListas(listaAgentes, listaClientes, listaPropriedades, listaVisitas, filaEspera);
+
+    } while (opcao != 13);
 }
 
 
 void criarConta() {
     CLIENTE novoCliente;
 
-    printf("Digite o ID do Cliente: ");
-    scanf("%d", &novoCliente.idCliente);
+    novoCliente.idCliente = encontrarMaiorIdCliente(listaClientes);
+
     limparBuffer();
 
     printf("Digite o nome: ");
@@ -629,13 +708,34 @@ void criarConta() {
 
 
 void printMenuInicial() {
-    printf("Bem-vindo a Rent Propriedade\n");
-    printf("1. Entrar como Admin\n");
-    printf("2. Entrar como Agente\n");
-    printf("3. Entrar como Cliente\n");
-    printf("4. Sair\n");
-}
+    int opcao;
+    do {
+        printf("Bem-vindo a Rent Propriedade\n");
+        printf("1. Entrar como Admin\n");
+        printf("2. Entrar como Agente\n");
+        printf("3. Entrar como Cliente\n");
+        printf("4. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
 
+        switch (opcao) {
+            case 1:
+                menuAdmin();
+                break;
+            case 2:
+                menuAgente();
+                break;
+            case 3:
+                menuCliente();
+                break;
+            case 4:
+                printf("Encerrando o programa...\n");
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (opcao != 4);
+}
 void menuAdmin() {
     int opcao;
     do {
@@ -742,8 +842,9 @@ void menuGerirClientes() {
         switch (opcao) {
             case 1: {
                 CLIENTE novoCliente;
+                novoCliente.idCliente = encontrarMaiorIdCliente(listaClientes);
                 printf("Digite o nome do cliente: ");
-                getchar(); // Limpar o buffer do teclado
+                 // Limpar o buffer do teclado
                 fgets(novoCliente.nome, sizeof(novoCliente.nome), stdin);
                 novoCliente.nome[strcspn(novoCliente.nome, "\n")] = '\0'; // Remover a quebra de linha
                 printf("Digite o NIF do cliente: ");
@@ -757,6 +858,8 @@ void menuGerirClientes() {
                 novoCliente.detalhesPropriedade[strcspn(novoCliente.detalhesPropriedade, "\n")] = '\0'; // Remover a quebra de linha
                 // Adicionar o cliente à lista
                 listaClientes = adicionarCliente(listaClientes, novoCliente);
+                gravarClientes(listaClientes);
+
                 break;
             }
             case 2: {
@@ -805,6 +908,7 @@ void menuGerirClientes() {
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
+        gravarTodasListas(listaAgentes, listaClientes, listaPropriedades, listaVisitas, filaEspera);
     } while (opcao != 6);
 }
 
@@ -821,8 +925,9 @@ void menuGerirAgentes() {
         printf("4. Listar Agentes por Ordem Alfabética\n");
         printf("5. Listar Agentes por Idade Ascendente\n");
         printf("6. Colocar Agente como Indisponível\n");
-        printf("7. Gerar Relatório de Agentes\n");
-        printf("8. Voltar\n");
+        printf("7. Colocar Agente como disponível\n");
+        printf("8. Gerar Relatório de Agentes\n");
+        printf("9. Voltar\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
         limparBuffer();  // Limpa o buffer após ler a opção
@@ -830,6 +935,7 @@ void menuGerirAgentes() {
         switch (opcao) {
             case 1: {
                 AGENTE novoAgente;
+                novoAgente.idAgente = encontrarMaiorIdAgente(listaAgentes);
                 printf("Digite o nome do agente: ");
                 fgets(novoAgente.nome, sizeof(novoAgente.nome), stdin);
                 novoAgente.nome[strcspn(novoAgente.nome, "\n")] = '\0'; // Remover a quebra de linha
@@ -905,18 +1011,30 @@ void menuGerirAgentes() {
                 tornarAgenteIndisponivel(listaAgentes, idAgente);
                 break;
             }
-            case 7:
+            case 7: {
+                int idAgente;
+                printf("Digite o ID do agente a colocar como disponível: ");
+                scanf("%d", &idAgente);
+                limparBuffer();  // Limpa o buffer após ler o ID do agente
+                // Colocar o agente como indisponível
+                tornarAgentedisponivel(listaAgentes, idAgente);
+                break;
+            }
+            case 8:
                 // Gerar relatório de agentes
                 gerarRelatorioAgentes(listaAgentes);
                 break;
-            case 8:
+            case 9:
                 printf("Voltando ao menu anterior...\n");
                 menuAdmin();
                 break;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (opcao != 8);
+    
+        gravarTodasListas(listaAgentes, listaClientes, listaPropriedades, listaVisitas, filaEspera);
+
+    } while (opcao != 9);
 }
 
 
@@ -938,6 +1056,7 @@ void menuGerirPropriedades() {
         switch (opcao) {
             case 1: {
                 PROPRIEDADE novaPropriedade;
+                novaPropriedade.idPropriedade = encontrarMaiorIdPropriedade(listaPropriedades);
                 printf("Digite o tipo da propriedade: ");
                 fgets(novaPropriedade.tipo, sizeof(novaPropriedade.tipo), stdin);
                 novaPropriedade.tipo[strcspn(novaPropriedade.tipo, "\n")] = '\0'; // Remover a quebra de linha ja se sabe
@@ -1008,6 +1127,8 @@ void menuGerirPropriedades() {
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
+        gravarTodasListas(listaAgentes, listaClientes, listaPropriedades, listaVisitas, filaEspera);
+
     } while (opcao != 5);
 }
 
@@ -1123,6 +1244,8 @@ void menuGerirVisitas() {
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
+        gravarTodasListas(listaAgentes, listaClientes, listaPropriedades, listaVisitas, filaEspera);
+
     } while (opcao != 10);
 }
 
@@ -1137,30 +1260,8 @@ int main() {
 	setlocale(LC_ALL, "Portuguese");
     
     carregarTodasListas(&listaAgentes, &listaClientes, &listaPropriedades, &listaVisitas, &filaEspera);
-    int opcao;
-	do {
-		printMenuInicial();
-		printf("Escolha uma opção: ");
-		scanf("%d", &opcao);
-
-
-		switch (opcao) {
-			case 1:
-				menuAdmin();
-				break;
-			case 2:
-                menuAgente();
-				break;
-			case 3:
-				menuCliente();
-				break;
-			case 4:
-				printf("Encerrando o programa...\n");
-				break;
-			default:
-				printf("Opção inválida. Tente novamente.\n");
-		}
-	} while (opcao != 4);
+    printMenuInicial();
+	
 
 	return 0;
 }

@@ -7,7 +7,31 @@ VISITA_NODE* agendarVisita(VISITA_NODE *lista, VISITA novaVisita) {
         novo->info = novaVisita;
         novo->seguinte = lista;
     }
-    return novo;
+    return novo;  // Retorna a nova cabeça da lista
+}
+
+void listarVisitas(VISITA_NODE *lista) {
+    VISITA_NODE *atual = lista;
+
+    if (atual == NULL) {
+        printf("Não há visitas cadastradas.\n");
+        return;
+    }
+
+
+    while (atual != NULL) {
+        printf("ID da Visita: %d\n", atual->info.idVisita);
+        printf("ID do Cliente: %d\n", atual->info.idCliente);
+        printf("ID da Propriedade: %d\n", atual->info.idpropriedade);
+        printf("ID do Agente: %d\n", atual->info.idAgente);
+        printf("Data e Hora: %s\n", atual->info.dataHora);
+        printf("Estado: %s\n", atual->info.estado);
+        printf("Relatório: %s\n", atual->info.relatorio);
+        printf("Preço: %.2f\n", atual->info.preco);
+        printf("Aceite: %d\n", atual->info.aceite);
+        printf("------------------------------\n");
+        atual = atual->seguinte;
+    }
 }
 
 // Função para listar visitas por data
@@ -240,6 +264,7 @@ void listarVisitasPorClienteporaceitar(VISITA_NODE *lista, int idCliente) {
             printf("ID Visita: %d\n", temp->info.idVisita);
             printf("ID Cliente: %d\n", temp->info.idCliente);
             printf("ID Agente: %d\n", temp->info.idAgente);
+            printf("ID Propriedade: %d\n", temp->info.idpropriedade);
             printf("Data e Hora: %s\n", temp->info.dataHora);
             printf("Estado: %s\n", temp->info.estado);
             printf("Relatório: %s\n", temp->info.relatorio);
@@ -258,6 +283,7 @@ void listarVisitasPorClienteaceitadas(VISITA_NODE *lista, int idCliente) {
             printf("ID Visita: %d\n", temp->info.idVisita);
             printf("ID Cliente: %d\n", temp->info.idCliente);
             printf("ID Agente: %d\n", temp->info.idAgente);
+            printf("ID Propriedade: %d\n", temp->info.idpropriedade);
             printf("Data e Hora: %s\n", temp->info.dataHora);
             printf("Estado: %s\n", temp->info.estado);
             printf("Relatório: %s\n", temp->info.relatorio);
@@ -313,6 +339,7 @@ void listarVisitasPorCliente(VISITA_NODE *lista, int idCliente) {
             printf("ID Visita: %d\n", atual->info.idVisita);
             printf("ID Cliente: %d\n", atual->info.idCliente);
             printf("ID Agente: %d\n", atual->info.idAgente);
+            printf("ID Propriedade: %d\n", atual->info.idpropriedade);
             printf("Data e Hora: %s\n", atual->info.dataHora);
             printf("Estado: %s\n", atual->info.estado);
             printf("Relatório: %s\n", atual->info.relatorio);
@@ -333,6 +360,7 @@ void aceitarVisita(VISITA_NODE *lista, int idVisita) {
     while (temp != NULL) {
         if (temp->info.idVisita == idVisita) {
             temp->info.aceite = 1;
+            strcpy(temp->info.estado, "agendada"); // Atualiza o estado para "agendada"
             printf("Visita com ID %d aceita com sucesso.\n", idVisita);
             return;
         }
@@ -349,6 +377,8 @@ void listarVisitasPorAceitar(VISITA_NODE *listaVisitas, int idAgente) {
         if (atual->info.idAgente == idAgente && atual->info.aceite == 0) {
             printf("ID Visita: %d\n", atual->info.idVisita);
             printf("ID Cliente: %d\n", atual->info.idCliente);
+            printf("ID Agente: %d\n", atual->info.idAgente);
+            printf("ID Propriedade: %d\n", atual->info.idpropriedade);
             printf("Data e Hora: %s\n", atual->info.dataHora);
             printf("Estado: %s\n", atual->info.estado);
             printf("Relatório: %s\n", atual->info.relatorio);
@@ -365,8 +395,63 @@ void listarVisitasPorAceitar(VISITA_NODE *listaVisitas, int idAgente) {
     }
 }
 
+void mudarEstadoVisita(VISITA_NODE *lista, int idVisita, const char *novoEstado) {
+    VISITA_NODE *temp = lista;
+    while (temp != NULL) {
+        if (temp->info.idVisita == idVisita) {
+            strcpy(temp->info.estado, novoEstado); // Atualiza o estado da visita
+            printf("Estado da visita com ID %d alterado para %s com sucesso.\n", idVisita, novoEstado);
+            return;
+        }
+        temp = temp->seguinte;
+    }
+    printf("Visita com ID %d não encontrada.\n", idVisita);
+}
+
+void listarVisitasAceitarAgente(VISITA_NODE *listaVisitas, int idAgente) {
+    VISITA_NODE *atual = listaVisitas;
+    int encontrouVisitas = 0;
+
+    while (atual != NULL) {
+        if (atual->info.idAgente == idAgente && atual->info.aceite == 1) {
+            printf("ID Visita: %d\n", atual->info.idVisita);
+            printf("ID Cliente: %d\n", atual->info.idCliente);
+            printf("ID Agente: %d\n", atual->info.idAgente);
+            printf("ID Propriedade: %d\n", atual->info.idpropriedade);
+            printf("Data e Hora: %s\n", atual->info.dataHora);
+            printf("Estado: %s\n", atual->info.estado);
+            printf("Relatório: %s\n", atual->info.relatorio);
+            printf("Preço: %.2f\n", atual->info.preco);
+            printf("Aceite: %d\n", atual->info.aceite);
+            printf("--------------------------\n");
+            encontrouVisitas = 1;
+        }
+        atual = atual->seguinte;
+    }
+
+    if (!encontrouVisitas) {
+        printf("Nenhuma visita aceitada encontrada para o agente com ID %d.\n", idAgente);
+    }
+}
+
+int encontrarMaiorIdVisita(VISITA_NODE *lista) {
+    int maiorId = 0;
+    VISITA_NODE *atual = lista;
+
+    // Percorre a lista para encontrar o maior idVisita
+    while (atual != NULL) {
+        if (atual->info.idVisita > maiorId) {
+            maiorId = atual->info.idVisita;
+        }
+        atual = atual->seguinte;
+    }
+
+    // Retorna o maior idVisita encontrado mais 1
+    return maiorId + 1;
+}
+
 // Função auxiliar para obter a data atual em formato "dd/mm/yyyy"
-void obterDataAtual(char *dataAtual) {
+void obterDataAtualdois(char *dataAtual) {
     time_t t = time(NULL);
     struct tm tm = *localtime(&t);
     sprintf(dataAtual, "%02d/%02d/%04d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
@@ -375,19 +460,19 @@ void obterDataAtual(char *dataAtual) {
 // Função para listar visitas de hoje
 void listarVisitasHoje(VISITA_NODE *lista) {
     char dataAtual[11];
-    obterDataAtual(dataAtual);
+    obterDataAtualdois(dataAtual);
     listarVisitasPorDia(lista, dataAtual);
 }
 
 void listarMinhasVisitasHoje(VISITA_NODE *lista, int idAgente) {
     char dataAtual[11];
-    obterDataAtual(dataAtual);
+    obterDataAtualdois(dataAtual);
     listarMinhasVisitasPorDia(lista, dataAtual, idAgente);
 }
 
 void listarPropriedadeVisitasHoje(VISITA_NODE *lista, PROPRIEDADE_NODE* listaPropriedade, const char *tipo) {
     char dataAtual[11];
-    obterDataAtual(dataAtual);
+    obterDataAtualdois(dataAtual);
     listarVisitasPorTipoPropriedade(lista, listaPropriedade, tipo, dataAtual);
 }
 

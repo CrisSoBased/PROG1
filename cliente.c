@@ -1,6 +1,39 @@
 #include "listas.h"
 
+int encontrarMaiorIdCliente(CLIENTE_NODE *lista) {
+    int maiorId = 0;
+    CLIENTE_NODE *atual = lista;
 
+    // Percorre a lista para encontrar o maior idCliente
+    while (atual != NULL) {
+        if (atual->info.idCliente > maiorId) {
+            maiorId = atual->info.idCliente;
+        }
+        atual = atual->seguinte;
+    }
+
+    // Retorna o maior idCliente encontrado mais 1
+    return maiorId + 1;
+}
+
+CLIENTE encontrarClientePorId(CLIENTE_NODE *lista, int idCliente) {
+    CLIENTE clienteEncontrado; // Cliente encontrado será armazenado aqui
+
+    // Percorre a lista de clientes
+    CLIENTE_NODE *atual = lista;
+    while (atual != NULL) {
+        // Verifica se o ID do cliente atual é igual ao ID procurado
+        if (atual->info.idCliente == idCliente) {
+            // Se encontrado, copia o cliente atual para a variável de cliente encontrado
+            clienteEncontrado = atual->info;
+            break; // Termina o loop, já encontramos o cliente
+        }
+        atual = atual->seguinte;
+    }
+
+    // Retorna o cliente encontrado
+    return clienteEncontrado;
+}
 
 CLIENTE autenticarCliente(CLIENTE_NODE *lista, const char *nome, const char *nif) {
     CLIENTE_NODE *atual = lista;

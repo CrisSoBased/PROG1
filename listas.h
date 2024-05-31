@@ -48,8 +48,8 @@ typedef struct visita {
     int idCliente;
     int idpropriedade;
     int idAgente;
-    char dataHora[20];  // Formato "dd/mm/yyyy hh:mm"
-    char estado[20];    // "agendada", "realizada", "n compareceu"
+    char dataHora[20];  // Formato "dd/mm/yyyy"
+    char estado[20];    // defeito = "por aceitar", //"agendada", "realizada", "n compareceu"
     char relatorio[200];
     float preco;
     int aceite;         //0 = ainda nao foi aceite; 1 ja foi aceite
@@ -96,7 +96,10 @@ void tornarAgenteIndisponivel(AGENTE_NODE *lista, int idAgente);
 void gerarRelatorioAgentes(AGENTE_NODE *lista);
 void atualizarAgente(AGENTE_NODE *listaAgentes, const char *nif, AGENTE agenteAtualizado);
 AGENTE_NODE* removerAgente(AGENTE_NODE *listaAgentes, const char *nif);
-
+int encontrarMaiorIdAgente(AGENTE_NODE *lista);
+AGENTE encontrarAgentePorId(AGENTE_NODE *lista, int idAgente);
+void listarAgentesDisponiveis(AGENTE_NODE *lista);
+void tornarAgentedisponivel(AGENTE_NODE *lista, int idAgente);
 // Funções auxiliares
 int calcularIdade(const char *dataNascimento);
 int compararIdades(const void *a, const void *b);
@@ -116,7 +119,7 @@ void removerPropriedade(PROPRIEDADE_NODE **lista, int idPropriedade);
 void editarPropriedade(PROPRIEDADE_NODE *lista, int idPropriedade, PROPRIEDADE propriedadeAtualizada);
 void propriedadeArrenda(PROPRIEDADE_NODE *lista, int idPropriedade, int tipo, int idComprador);
 void propriedadeFatura(PROPRIEDADE_NODE *lista, const char *data, int n, int m);
-
+int encontrarMaiorIdPropriedade(PROPRIEDADE_NODE *lista);
 // Funções para manipulação da lista de clientes
 CLIENTE_NODE* adicionarCliente(CLIENTE_NODE *lista, CLIENTE novoCliente);
 void listarClientes(CLIENTE_NODE *lista);
@@ -124,11 +127,11 @@ void listarClientesPorNome(CLIENTE_NODE *lista);
 void apresentarClientePorNIF(CLIENTE_NODE *lista, const char *nif);
 CLIENTE_NODE* removerCliente(CLIENTE_NODE *lista, const char *nif);
 void atualizarCliente(CLIENTE_NODE *lista, const char *nif, CLIENTE clienteAtualizado);
-
+int encontrarMaiorIdCliente(CLIENTE_NODE *lista);
 // Funções auxiliares para clientes
 int compararNomesClientes(const void *a, const void *b);
 CLIENTE autenticarCliente(CLIENTE_NODE *lista, const char *nome, const char *nif);
-
+CLIENTE encontrarClientePorId(CLIENTE_NODE *lista, int idCliente);
 
 // Funções para manipulação da lista de visitas
 VISITA_NODE* agendarVisita(VISITA_NODE *lista, VISITA novaVisita);
@@ -150,10 +153,11 @@ void listarMinhasVisitasHoje(VISITA_NODE *lista, int idAgente);
 void listarPropriedadeVisitasHoje(VISITA_NODE *lista, PROPRIEDADE_NODE* listaPropriedade, const char *tipo);
 void listarVisitasPorDia(VISITA_NODE *lista, const char *data);
 void listarMinhasVisitasPorDia(VISITA_NODE *lista, const char *data, int idAgente);
-
+int encontrarMaiorIdVisita(VISITA_NODE *lista);
 void listarVisitasPorTipoPropriedade(VISITA_NODE *listaVisitas, PROPRIEDADE_NODE *listaPropriedades, const char *tipoPropriedade, const char *data);
-
-
+void listarVisitas(VISITA_NODE *lista);
+void listarVisitasAceitarAgente(VISITA_NODE *listaVisitas, int idAgente);
+void mudarEstadoVisita(VISITA_NODE *lista, int idVisita, const char *novoEstado);
 // Funções para manipulação da fila de espera
 FILA_ESPERA* adicionarClienteFilaEspera(FILA_ESPERA *fila, int idCliente, const char *nome, float duracaoEstimada);
 FILA_ESPERA* removerProximoClienteFilaEspera(FILA_ESPERA *fila);

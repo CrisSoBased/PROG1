@@ -172,6 +172,21 @@ void propriedadeArrenda(PROPRIEDADE_NODE *lista, int idPropriedade, int tipo, in
 }
 
 
+int encontrarMaiorIdPropriedade(PROPRIEDADE_NODE *lista) {
+    int maiorId = 0;
+    PROPRIEDADE_NODE *atual = lista;
+
+    // Percorre a lista para encontrar o maior idPropriedade
+    while (atual != NULL) {
+        if (atual->info.idPropriedade > maiorId) {
+            maiorId = atual->info.idPropriedade;
+        }
+        atual = atual->seguinte;
+    }
+
+    return maiorId + 1;
+}
+
 void propriedadeFatura(PROPRIEDADE_NODE *lista, const char *data, int n, int m) {
 
     PROPRIEDADE_NODE *atual = lista;

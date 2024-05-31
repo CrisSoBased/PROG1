@@ -1,6 +1,20 @@
 #include "listas.h"
 
 
+int encontrarMaiorIdAgente(AGENTE_NODE *lista) {
+    int maiorId = 0;
+    AGENTE_NODE *atual = lista;
+
+    // Percorre a lista para encontrar o maior idAgente
+    while (atual != NULL) {
+        if (atual->info.idAgente > maiorId) {
+            maiorId = atual->info.idAgente;
+        }
+        atual = atual->seguinte;
+    }
+
+    return maiorId + 1;
+}
 
 AGENTE* autenticarAgente(AGENTE_NODE *lista, const char *nome, const char *nif) {
     AGENTE_NODE *atual = lista;
@@ -43,6 +57,20 @@ void tornarAgenteIndisponivel(AGENTE_NODE *lista, int idAgente) {
     while (temp != NULL) {
         if (temp->info.idAgente == idAgente) {
             temp->info.disponibilidade = 1; // Definir a disponibilidade como indisponível
+            printf("Agente com ID %d agora está indisponível.\n", idAgente);
+            return;
+        }
+        temp = temp->seguinte;
+    }
+    printf("Agente com ID %d não encontrado.\n", idAgente);
+}
+
+
+void tornarAgentedisponivel(AGENTE_NODE *lista, int idAgente) {
+    AGENTE_NODE *temp = lista;
+    while (temp != NULL) {
+        if (temp->info.idAgente == idAgente) {
+            temp->info.disponibilidade = 0; // Definir a disponibilidade como indisponível
             printf("Agente com ID %d agora está indisponível.\n", idAgente);
             return;
         }
@@ -96,6 +124,9 @@ void listarAgentesPorNome(AGENTE_NODE *lista) {
         printf("Telefone: %s\n", agentes[i].ntelefone);
         printf("Data de Nascimento: %s\n", agentes[i].datanascimento);
         printf("Tipo de Conta: %d\n\n", agentes[i].tipoconta);
+        printf("disponivel: %d\n\n", agentes[i].disponibilidade);
+
+
     }
 
     // Liberar a memória alocada para o array de agentes
@@ -140,6 +171,9 @@ int calcularIdade(const char *dataNascimento) {
     return idade;
 }
 
+
+
+
 // Função auxiliar para comparar duas idades de agentes
 int compararIdades(const void *a, const void *b) {
     const AGENTE *agenteA = (const AGENTE *)a;
@@ -148,6 +182,25 @@ int compararIdades(const void *a, const void *b) {
     int idadeA = calcularIdade(agenteA->datanascimento);
     int idadeB = calcularIdade(agenteB->datanascimento);
     return idadeA - idadeB;
+}
+
+
+void listarAgentesDisponiveis(AGENTE_NODE *lista) {
+    AGENTE_NODE *atual = lista;
+
+    while (atual != NULL) {
+        if (atual->info.disponibilidade == 0) {
+            printf("ID do Agente: %d\n", atual->info.idAgente);
+            printf("Nome: %s\n", atual->info.nome);
+            printf("NIF: %s\n", atual->info.nif);
+            printf("Morada: %s\n", atual->info.morada);
+            printf("Telefone: %s\n", atual->info.ntelefone);
+            printf("Data de Nascimento: %s\n", atual->info.datanascimento);
+            printf("Tipo de Conta: %d\n", atual->info.tipoconta);
+            printf("------------------------------------------\n");
+        }
+        atual = atual->seguinte;
+    }
 }
 
 // Função para listar agentes, ordenados por idade ascendente
